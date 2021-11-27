@@ -1,5 +1,6 @@
 import pygame
 import numpy as np
+import glm
 from pygame.locals import *
 import shaders
 from gl import Renderer, Model
@@ -17,27 +18,25 @@ clock = pygame.time.Clock()
 rend = Renderer(screen)
 rend.setShaders(shaders.vertex_shader, shaders.fragment_shader)
 
-vertex_data = np.array([-0.5,-0.5, 0.5, 1.0, 0.0, 0.0,
-                        -0.5, 0.5, 0.5, 0.0, 1.0, 0.0,
-                         0.5, 0.5, 0.5, 0.0, 0.0, 1.0,
-                         0.5,-0.5, 0.5, 1.0, 1.0, 0.0,
-                        -0.5,-0.5,-0.5, 1.0, 0.0, 1.0,
-                        -0.5, 0.5,-0.5, 0.0, 1.0, 1.0,
-                         0.5, 0.5,-0.5, 1.0, 1.0, 1.0,
-                         0.5,-0.5,-0.5, 0.0, 0.0, 0.0], dtype = np.float32)
+face = Model('model.obj', 'model.bmp')
+face.position.z = -5
 
-index_data = np.array([0,1,3, 1,2,3,
-                       1,5,2, 5,6,2,
-                       4,5,0, 5,1,0,
-                       3,2,7, 6,2,7,
-                       4,0,7, 0,3,7,
-                       5,4,6, 4,7,6], dtype = np.uint32)
+radius =  ((rend.camPosition.x - face.position.x) ** 2 + (rend.camPosition.y - face.position.y) ** 2 + (rend.camPosition.z - face.position.z) ** 2)**0.5
+angle = 0
+def movCircular(angle):
+    x = glm.cos(angle) * radius * deltaTime
+    z = glm.sin(angle) * radius * deltaTime
+    rend.camPosition.x = x
+    rend.camPosition.z = z
+    rend.camRotation.y = -angle * deltaTime
 
+    print(x, z)
+    print(radius)
+    print(angle)
+    #glm.cos()
+    pass
 
-cube = Model(vertex_data, index_data)
-cube.position.z = -5
-
-rend.scene.append( cube )
+rend.scene.append( face )
 
 isRunning = True
 while isRunning:
@@ -53,12 +52,35 @@ while isRunning:
         rend.camPosition.z += 1 * deltaTime
     if keys[K_s]:
         rend.camPosition.z -= 1 * deltaTime
-
     if keys[K_q]:
-        rend.camRotation.y -= 5 * deltaTime
+        rend.camPosition.y -= 1 * deltaTime
     if keys[K_e]:
-        rend.camRotation.y += 5 * deltaTime
+        rend.camPosition.y += 1 * deltaTime
 
+    # Rotacion de camara
+    if keys[K_z]:
+        angle +=15
+        movCircular(glm.radians(angle))
+    if keys[K_x]:
+        angle -=15
+        #rend.camRotation.y += 15 
+        movCircular(glm.radians(angle))
+    
+    # Zoom de camara
+    if keys[K_g]:
+        if rend.fov > glm.radians(5):
+            rend.fov -= glm.radians(5)
+            rend.projectionMatrix = glm.perspective(rend.fov, 
+                                                    rend.width / rend.height, 
+                                                    0.1, 
+                                                    1000) 
+    if keys[K_h]:
+        if rend.fov <= glm.radians(60):
+            rend.fov += glm.radians(5)
+            rend.projectionMatrix = glm.perspective(rend.fov, 
+                                                    rend.width / rend.height, 
+                                                    0.1, 
+                                                    1000) 
     for ev in pygame.event.get():
         if ev.type == pygame.QUIT:
             isRunning = False
@@ -70,6 +92,11 @@ while isRunning:
                 rend.filledMode()
             if ev.key == K_2:
                 rend.wireframeMode()
+    
+    #Movimiento del objeto
+    #rend.scene[0].rotation.x += 10 * deltaTime
+    #rend.scene[0].rotation.y += 10 * deltaTime
+    #rend.scene[0].rotation.z += 10 * deltaTime
     
     rend.render()
 
