@@ -9,14 +9,21 @@ uniform mat4 viewMatrix;
 uniform mat4 projectionMatrix;
 
 uniform float tiempo;
+uniform vec3 pointLight; 
 
 out vec3 outColor;
 out vec2 outTexCoords;
 
 void main()
 {
-    vec4 pos = vec4 (position.x, position.y, position.z, 1.0);
-    gl_Position = projectionMatrix * viewMatrix * modelMatrix * pos;
+
+    vec4 norm = vec4(normal, 0.0);
+    vec4 pos = modelMatrix * vec4 (position, 1.0);
+    vec4 light = vec4(pointLight, 1.0);
+
+    float intensity = dot(modelMatrix * norm, normalize(light - pos));
+
+    gl_Position = projectionMatrix * viewMatrix * pos;
     outColor = vec3(1.0, 1.0, 1.0);
     outTexCoords = texCoords;
 }

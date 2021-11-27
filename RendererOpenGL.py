@@ -26,15 +26,8 @@ angle = 0
 def movCircular(angle):
     x = glm.cos(angle) * radius * deltaTime
     z = glm.sin(angle) * radius * deltaTime
-    rend.camPosition.x = x
-    rend.camPosition.z = z
-    rend.camRotation.y = -angle * deltaTime
-
-    print(x, z)
-    print(radius)
-    print(angle)
-    #glm.cos()
-    pass
+    rend.camPosition.x += x
+    rend.camPosition.z += z
 
 rend.scene.append( face )
 
@@ -59,14 +52,11 @@ while isRunning:
 
     # Rotacion de camara
     if keys[K_z]:
-        angle +=15
-        movCircular(glm.radians(angle))
+        rend.horizontal_rotation(deltaTime)
     if keys[K_x]:
-        angle -=15
-        #rend.camRotation.y += 15 
-        movCircular(glm.radians(angle))
+        rend.horizontal_rotation(-deltaTime)
     
-    # Zoom de camara
+    #Zoom de camara
     if keys[K_g]:
         if rend.fov > glm.radians(5):
             rend.fov -= glm.radians(5)
