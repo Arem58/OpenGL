@@ -43,7 +43,7 @@ class Model(object):
                 buffer.append(pos[1])
                 buffer.append(pos[2])
 
-                #normals
+                # normals
                 norm = self.model.normals[face[i][2] - 1]
                 buffer.append(norm[0])
                 buffer.append(norm[1])
@@ -92,7 +92,7 @@ class Model(object):
                               GL_FLOAT, #Type
                               GL_FALSE, # It is normalized?
                               4 * 8, # Stride
-                              ctypes.c_void_p(0)) #Offset
+                              ctypes.c_void_p(4 * 3)) #Offset
 
         glEnableVertexAttribArray(1)
 
@@ -134,7 +134,8 @@ class Renderer(object):
         self.filledMode()
 
         self.scene = []
-        self.pointLight = glm.vec3(-10, 0, -5)
+        self.tiempo = 0
+        self.pointLight = glm.vec3(0, 0, 5)
         self.fov = glm.radians(60)
         # Viww Matrix
         self.camPosition = glm.vec3(0,0,5)
@@ -193,6 +194,8 @@ class Renderer(object):
                                                                     
             glUniformMatrix4fv(glGetUniformLocation(self.active_shader, "projectionMatrix"),
                                1, GL_FALSE, glm.value_ptr(self.projectionMatrix))
+
+            glUniform1f(glGetUniformLocation(self.active_shader, "tiempo"), self.tiempo)
 
             glUniform3f(glGetUniformLocation(self.active_shader, "pointLight"),
                         self.pointLight.x, self.pointLight.y, self.pointLight.z)

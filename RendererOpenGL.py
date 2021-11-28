@@ -16,7 +16,7 @@ screen = pygame.display.set_mode((width, height), pygame.DOUBLEBUF | pygame.OPEN
 clock = pygame.time.Clock()
 
 rend = Renderer(screen)
-rend.setShaders(shaders.vertex_shader, shaders.fragment_shader)
+rend.setShaders(shaders.vertex_shader_ejemplo_desimflar, shaders.fragment_shader)
 
 face = Model('model.obj', 'model.bmp')
 
@@ -35,6 +35,7 @@ def circularMov(angle):
     return x, z, angle
 
 rend.scene.append( face )
+
 
 isRunning = True
 while isRunning:
@@ -94,14 +95,10 @@ while isRunning:
             if ev.key == K_2:
                 rend.wireframeMode()
     
-    #Movimiento del objeto
-    #rend.scene[0].rotation.x += 10 * deltaTime
-    #rend.scene[0].rotation.y += 10 * deltaTime
-    #rend.scene[0].rotation.z += 10 * deltaTime
-    
-    rend.render()
+    rend.tiempo += deltaTime 
 
     deltaTime = clock.tick(60) / 1000
+    rend.render()
     pygame.display.flip()
 
 pygame.quit()
