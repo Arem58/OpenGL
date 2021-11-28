@@ -50,9 +50,13 @@ while isRunning:
         circularMov(0)
     if keys[K_q]:
         ytemp -= 1 * deltaTime
+        xtemp = glm.sin(angleTemp) * radius
+        ztemp = glm.cos(angleTemp) * radius
         rend.viewMatix = glm.lookAt(glm.vec3(xtemp, ytemp, ztemp), face.position, glm.vec3(0.0, 1.0, 0.0))
     if keys[K_e]:
         ytemp += 1 * deltaTime 
+        xtemp = glm.sin(angleTemp) * radius
+        ztemp = glm.cos(angleTemp) * radius
         rend.viewMatix = glm.lookAt(glm.vec3(xtemp, ytemp, ztemp), face.position, glm.vec3(0.0, 1.0, 0.0))
 
     # Rotacion de camara
@@ -71,7 +75,7 @@ while isRunning:
                                                     rend.width / rend.height, 
                                                     0.1, 
                                                     1000) 
-    if keys[K_h]:
+    if keys[K_f]:
         if rend.fov <= glm.radians(60):
             rend.fov += glm.radians(5)
             rend.projectionMatrix = glm.perspective(rend.fov, 
