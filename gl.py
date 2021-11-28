@@ -137,10 +137,12 @@ class Renderer(object):
         self.pointLight = glm.vec3(-10, 0, -5)
         self.fov = glm.radians(60)
         # Viww Matrix
-        self.camPosition = glm.vec3(0,0,0)
+        self.camPosition = glm.vec3(0,0,5)
         self.camRotation = glm.vec3(0,0,0) # pitch, yaw, roll
 
         # ViewportMatrix * projectionMatrix * viewMatrix * modelMatrix * pos
+
+        self.viewMatix = self.getViewMatrix()
 
         #Projection Matrix
         self.projectionMatrix = glm.perspective(self.fov, # FOV en radianes
@@ -148,8 +150,8 @@ class Renderer(object):
                                                 0.1, #Neas Plane distance
                                                 1000) #Far plane distance
 
-    def horizontal_rotation(self, amount):
-        center = self.scene.position
+    def horizontal_rotation(self, amount, position):
+        center = position
         self.angle += amount
         self.camPosition.x = glm.sin(self.angle) * self.radius
         self.camPosition.z = glm.cos(self.angle) * self.radius
@@ -187,7 +189,7 @@ class Renderer(object):
 
         if self.active_shader:
             glUniformMatrix4fv(glGetUniformLocation(self.active_shader, "viewMatrix"),
-                               1, GL_FALSE, glm.value_ptr(self.getViewMatrix()))
+                               1, GL_FALSE, glm.value_ptr(self.viewMatix))
                                                                     
             glUniformMatrix4fv(glGetUniformLocation(self.active_shader, "projectionMatrix"),
                                1, GL_FALSE, glm.value_ptr(self.projectionMatrix))

@@ -19,15 +19,20 @@ rend = Renderer(screen)
 rend.setShaders(shaders.vertex_shader, shaders.fragment_shader)
 
 face = Model('model.obj', 'model.bmp')
-face.position.z = -5
 
 radius =  ((rend.camPosition.x - face.position.x) ** 2 + (rend.camPosition.y - face.position.y) ** 2 + (rend.camPosition.z - face.position.z) ** 2)**0.5
 angle = 0
-def movCircular(angle):
-    x = glm.cos(angle) * radius * deltaTime
-    z = glm.sin(angle) * radius * deltaTime
-    rend.camPosition.x += x
-    rend.camPosition.z += z
+xtemp = rend.camPosition.x
+ytemp = rend.camPosition.y
+ztemp = rend.camPosition.z
+angleTemp = 0
+def circularMov(angle):
+    if angle == 0:
+        angle = angleTemp
+    x = glm.sin(angle) * radius
+    z = glm.cos(angle) * radius
+    rend.viewMatix = glm.lookAt(glm.vec3(x, ytemp, z), face.position, glm.vec3(0.0, 1.0, 0.0))
+    return x, z, angle
 
 rend.scene.append( face )
 
@@ -37,24 +42,26 @@ while isRunning:
     keys = pygame.key.get_pressed()
 
     # Traslacion de camara
-    if keys[K_d]:
-        rend.camPosition.x += 1 * deltaTime
-    if keys[K_a]:
-        rend.camPosition.x -= 1 * deltaTime
     if keys[K_w]:
-        rend.camPosition.z += 1 * deltaTime
+        radius += 1 * deltaTime
+        circularMov(0)
     if keys[K_s]:
-        rend.camPosition.z -= 1 * deltaTime
+        radius -= 1 * deltaTime
+        circularMov(0)
     if keys[K_q]:
-        rend.camPosition.y -= 1 * deltaTime
+        ytemp -= 1 * deltaTime
+        rend.viewMatix = glm.lookAt(glm.vec3(xtemp, ytemp, ztemp), face.position, glm.vec3(0.0, 1.0, 0.0))
     if keys[K_e]:
-        rend.camPosition.y += 1 * deltaTime
+        ytemp += 1 * deltaTime 
+        rend.viewMatix = glm.lookAt(glm.vec3(xtemp, ytemp, ztemp), face.position, glm.vec3(0.0, 1.0, 0.0))
 
     # Rotacion de camara
-    if keys[K_z]:
-        rend.horizontal_rotation(deltaTime)
-    if keys[K_x]:
-        rend.horizontal_rotation(-deltaTime)
+    if keys[K_d]:
+        angle += deltaTime
+        xtemp, ztemp, angleTemp = circularMov(angle)
+    if keys[K_a]:
+        angle -= deltaTime
+        xtemp, ztemp, angleTemp = circularMov(angle)
     
     #Zoom de camara
     if keys[K_g]:
@@ -90,7 +97,6 @@ while isRunning:
     
     rend.render()
 
-    clock.tick(60)
     deltaTime = clock.tick(60) / 1000
     pygame.display.flip()
 
