@@ -1,6 +1,7 @@
 import pygame
 import numpy as np
 import glm
+from pygame import key
 from pygame.locals import *
 import shaders
 from gl import Renderer, Model
@@ -16,9 +17,9 @@ screen = pygame.display.set_mode((width, height), pygame.DOUBLEBUF | pygame.OPEN
 clock = pygame.time.Clock()
 
 rend = Renderer(screen)
-rend.setShaders(shaders.vertex_shader_ejemplo_desimflar, shaders.fragment_shader)
+rend.setShaders(shaders.vertex_shader, shaders.fragment_shader)
 
-face = Model('model.obj', 'model.bmp')
+face = Model('model.obj', 'model.bmp', 'model_normal.bmp')
 
 radius =  ((rend.camPosition.x - face.position.x) ** 2 + (rend.camPosition.y - face.position.y) ** 2 + (rend.camPosition.z - face.position.z) ** 2)**0.5
 angle = 0
@@ -67,7 +68,13 @@ while isRunning:
     if keys[K_a]:
         angle -= deltaTime
         xtemp, ztemp, angleTemp = circularMov(angle)
-    
+
+    if keys[K_LEFT]:
+        rend.valor -=1 * deltaTime
+
+    if keys[K_RIGHT]:
+        rend.valor +=1 * deltaTime
+
     #Zoom de camara
     if keys[K_g]:
         if rend.fov > glm.radians(5):
@@ -94,6 +101,14 @@ while isRunning:
                 rend.filledMode()
             if ev.key == K_2:
                 rend.wireframeMode()
+            if ev.key == K_3:
+                rend.setShaders(shaders.vertex_shader, shaders.fragment_shader)
+            if ev.key == K_4:
+                rend.setShaders(shaders.toon_vertex_shaders, shaders.fragment_shader)
+            if ev.key == K_5:
+                rend.setShaders(shaders.vertex_shader, shaders.neg_fragment_shader)
+            if ev.key == K_6:
+                rend.setShaders(shaders.vertex_shader, shaders.glow_fragment_shader)
     
     rend.tiempo += deltaTime 
 

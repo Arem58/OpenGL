@@ -7,7 +7,7 @@ from pygame import image
 import obj
 
 class Model(object):
-    def __init__(self, objName, textureName):
+    def __init__(self, objName, textureName, textureName2):
 
         self.model = obj.Obj(objName)
 
@@ -20,6 +20,10 @@ class Model(object):
         self.textureSurface = image.load(textureName)
         self.textureData = image.tostring(self.textureSurface, "RGB", True)
         self.texture = glGenTextures(1)
+
+        self.textureSurface2 = image.load(textureName2)
+        self.textureData2 = image.tostring(self.textureSurface2, "RGB", True)
+        self.texture2 = glGenTextures(1)
 
     def getModelMatrix(self):
         identity = glm.mat4(1)
@@ -107,6 +111,7 @@ class Model(object):
         glEnableVertexAttribArray(2)
 
         # Dar textura
+        glActiveTexture(GL_TEXTURE0)
         glBindTexture(GL_TEXTURE_2D, self.texture)
         glTexImage2D(GL_TEXTURE_2D, # Texture type
                      0, # Level
@@ -117,6 +122,21 @@ class Model(object):
                      GL_RGB, #Format
                      GL_UNSIGNED_BYTE, # Type
                      self.textureData) # Data
+
+        glGenerateMipmap(GL_TEXTURE_2D)
+
+        #Segunda textura
+        glActiveTexture(GL_TEXTURE1)
+        glBindTexture(GL_TEXTURE_2D, self.texture2)
+        glTexImage2D(GL_TEXTURE_2D, # Texture type
+                     0, # Level
+                     GL_RGB, # Format
+                     self.textureSurface.get_width(), #Width 
+                     self.textureSurface.get_height(),  #Height
+                     0, # Border
+                     GL_RGB, #Format
+                     GL_UNSIGNED_BYTE, # Type
+                     self.textureData2) # Data
 
         glGenerateMipmap(GL_TEXTURE_2D)
 
@@ -135,7 +155,8 @@ class Renderer(object):
 
         self.scene = []
         self.tiempo = 0
-        self.pointLight = glm.vec3(0, 0, 5)
+        self.valor = 0
+        self.pointLight = glm.vec3(0, 0, 2)
         self.fov = glm.radians(60)
         # Viww Matrix
         self.camPosition = glm.vec3(0,0,5)
@@ -196,6 +217,7 @@ class Renderer(object):
                                1, GL_FALSE, glm.value_ptr(self.projectionMatrix))
 
             glUniform1f(glGetUniformLocation(self.active_shader, "tiempo"), self.tiempo)
+            glUniform1f(glGetUniformLocation(self.active_shader, "valor"), self.valor)
 
             glUniform3f(glGetUniformLocation(self.active_shader, "pointLight"),
                         self.pointLight.x, self.pointLight.y, self.pointLight.z)
@@ -204,4 +226,6 @@ class Renderer(object):
             if self.active_shader:
                 glUniformMatrix4fv(glGetUniformLocation(self.active_shader, "modelMatrix"),
                                 1, GL_FALSE, glm.value_ptr(model.getModelMatrix()))
+                glUniform1i(glGetUniformLocation(self.active_shader, "tex1"), 0)
+                glUniform1i(glGetUniformLocation(self.active_shader, "tex2"), 1)
             model.renderInScene()

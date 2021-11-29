@@ -13,6 +13,7 @@ uniform vec3 pointLight;
 
 out vec3 outColor;
 out vec2 outTexCoords;
+out float glowAmount;
 
 void main()
 {
@@ -22,12 +23,48 @@ void main()
     vec4 light = vec4(pointLight, 1.0);
 
     float intensity = dot(modelMatrix * norm, normalize(light - pos));
+    //float intensityGlowAmount = dot(norm, modelMatrix);
+    glowAmount = 1 - intensity;
 
     gl_Position = projectionMatrix * viewMatrix * pos;
     outColor = vec3(1.0, 1.0, 1.0);
     outTexCoords = texCoords;
 }
 
+"""
+
+toon_vertex_shaders = """
+#version 460
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec3 normal;
+layout (location = 2) in vec2 texCoords;
+
+uniform mat4 modelMatrix;
+uniform mat4 viewMatrix;
+uniform mat4 projectionMatrix;
+
+uniform float tiempo;
+uniform vec3 pointLight; 
+
+out vec3 outColor;
+out vec2 outTexCoords;
+
+void main()
+{
+
+    vec4 norm = vec4(normal, 0.0);
+    vec4 pos = modelMatrix * vec4 (position, 1.0);
+    vec4 light = vec4(pointLight, 1.0);
+
+    float intensity = dot(modelMatrix * norm, normalize(light - pos));
+    intensity = intensity > 0.95 ? 1 : (intensity > 0.7 ? 0.8 : (intensity > 0.4 ? 0.6 : (intensity > 0.2 ? 0.4 : 0.3)));
+    //intensity = intensity > 0.95 ? 1 : (intensity > 0.7 ? 0.7 : (intensity > 0.4 ? 0.4 : (intensity > 0.1 ? 0.1 : 0.05)));
+    //intensity = intensity > 0.95 ? 0.05 : (intensity > 0.7 ? 0.4 : (intensity > 0.4 ? 0.7 : (intensity > 0.1 ? 1 : 0.05)));
+
+    gl_Position = projectionMatrix * viewMatrix * pos;
+    outColor = vec3(1.0, 1.0, 1.0) * intensity;
+    outTexCoords = texCoords;
+}
 """
 
 fragment_shader = """
@@ -41,100 +78,55 @@ uniform sampler2D tex;
 
 void main()
 {
-    fragColor = vec4(outColor, 1) * texture(tex, outTexCoords);
+    fragColor = vec4(outColor,1) * texture(tex, outTexCoords);
 }
 """
 
-vertex_shader_tiempo_ejemplo = """
+toon_fragment_shader = """
 #version 460
-layout (location = 0) in vec3 position;
-layout (location = 1) in vec3 normal;
-layout (location = 2) in vec2 texCoords;
+layout (location = 0) out vec4 fragColor;
 
-uniform mat4 modelMatrix;
-uniform mat4 viewMatrix;
-uniform mat4 projectionMatrix;
+in vec3 outColor; 
+in vec2 outTexCoords;
 
-uniform float tiempo;
-uniform vec3 pointLight; 
-
-out vec3 outColor;
-out vec2 outTexCoords;
+uniform sampler2D tex;
 
 void main()
 {
-
-    vec4 norm = vec4(normal, 0.0);
-    vec4 pos = modelMatrix * vec4 (position.x, position.y + sin(tiempo + position.x), position.z + tan(tiempo + position.x), 1.0);
-    vec4 light = vec4(pointLight, 1.0);
-
-    float intensity = dot(modelMatrix * norm, normalize(light - pos));
-
-    gl_Position = projectionMatrix * viewMatrix * pos;
-    outColor = vec3(1.0, 1.0, 1.0);
-    outTexCoords = texCoords;
+    fragColor = vec4(1-outColor.x, 1-outColor.y, 1-outColor.z,1) * texture(tex, outTexCoords);
 }
-
 """
 
-vertex_shader_luz_ejemplo = """
+neg_fragment_shader = """
 #version 460
-layout (location = 0) in vec3 position;
-layout (location = 1) in vec3 normal;
-layout (location = 2) in vec2 texCoords;
+layout (location = 0) out vec4 fragColor;
 
-uniform mat4 modelMatrix;
-uniform mat4 viewMatrix;
-uniform mat4 projectionMatrix;
+in vec3 outColor; 
+in vec2 outTexCoords;
 
-uniform float tiempo;
-uniform vec3 pointLight; 
-
-out vec3 outColor;
-out vec2 outTexCoords;
+uniform sampler2D tex;
 
 void main()
 {
-
-    vec4 norm = vec4(normal, 0.0);
-    vec4 pos = modelMatrix * vec4 (position, 1.0);
-    vec4 light = vec4(pointLight, 1.0);
-
-    float intensity = dot(modelMatrix * norm, normalize(light - pos));
-
-    gl_Position = projectionMatrix * viewMatrix * pos;
-    outColor = vec3(1.0, 1.0, 1.0) * intensity;
-    outTexCoords = texCoords;
+    vec4 neg = vec4(1.0, 1.0, 1.0, 1.0);
+    fragColor = neg - texture(tex, outTexCoords);
 }
-
 """
 
-vertex_shader_ejemplo_desimflar = """
+glow_fragment_shader = """
 #version 460
-layout (location = 0) in vec3 position;
-layout (location = 1) in vec3 normal;
-layout (location = 2) in vec2 texCoords;
+layout (location = 0) out vec4 fragColor;
 
-uniform mat4 modelMatrix;
-uniform mat4 viewMatrix;
-uniform mat4 projectionMatrix;
+in vec3 outColor; 
+in vec2 outTexCoords;
+in float glowAmount;
 
-uniform float tiempo;
-uniform vec3 pointLight; 
-
-out vec3 outColor;
-out vec2 outTexCoords;
+uniform sampler2D tex;
 
 void main()
 {
-    vec4 norm = vec4(normal, 0.0);
-    vec4 pos = vec4(position, 1.0) + norm * sin(tiempo);
-    pos = modelMatrix * pos;
-    vec4 light = vec4(pointLight, 1.0);
-    float intensity = dot(modelMatrix * norm, normalize(light - pos));
-    gl_Position = projectionMatrix * viewMatrix * pos;
-    outColor = vec3(1.0, 1.0, 1.0);
-    outTexCoords = texCoords;
+    
+    vec4 glowColor = vec4(0.0 * glowAmount, 1.0 * glowAmount, 0.0 * glowAmount, 1.0);
+    fragColor = glowColor + texture(tex, outTexCoords);
 }
-
 """
