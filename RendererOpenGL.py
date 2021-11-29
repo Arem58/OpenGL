@@ -20,10 +20,14 @@ rend = Renderer(screen)
 rend.setShaders(shaders.vertex_shader, shaders.fragment_shader)
 activeShader = 1
 
+index = 0
 
-face = Model('model.obj', 'model.bmp', 'model_normal.bmp')
+face = [Model('model.obj', 'model.bmp', 'model_normal.bmp'),
+        Model('olla.obj', 'red.bmp', 'model_normal.bmp'),
+        Model('lavaPlatos.obj', 'metal.bmp', 'model_normal.bmp'),
+        Model('basurero.obj', 'tela.bmp', 'model_normal.bmp')]
 
-radius =  ((rend.camPosition.x - face.position.x) ** 2 + (rend.camPosition.y - face.position.y) ** 2 + (rend.camPosition.z - face.position.z) ** 2)**0.5
+radius =  ((rend.camPosition.x - face[index].position.x) ** 2 + (rend.camPosition.y - face[index].position.y) ** 2 + (rend.camPosition.z - face[index].position.z) ** 2)**0.5
 angle = 0
 xtemp = rend.camPosition.x
 ytemp = rend.camPosition.y
@@ -34,10 +38,10 @@ def circularMov(angle):
         angle = angleTemp
     x = glm.sin(angle) * radius
     z = glm.cos(angle) * radius
-    rend.viewMatix = glm.lookAt(glm.vec3(x, ytemp, z), face.position, glm.vec3(0.0, 1.0, 0.0))
+    rend.viewMatix = glm.lookAt(glm.vec3(x, ytemp, z), face[index].position, glm.vec3(0.0, 1.0, 0.0))
     return x, z, angle
 
-rend.scene.append( face )
+rend.scene = face[index]
 sickTime = 0
 angryTime = 0
 isRunning = True
@@ -57,13 +61,12 @@ while isRunning:
         ytemp -= 1 * deltaTime
         xtemp = glm.sin(angleTemp) * radius
         ztemp = glm.cos(angleTemp) * radius
-        rend.viewMatix = glm.lookAt(glm.vec3(xtemp, ytemp, ztemp), face.position, glm.vec3(0.0, 1.0, 0.0))
+        rend.viewMatix = glm.lookAt(glm.vec3(xtemp, ytemp, ztemp), face[index].position, glm.vec3(0.0, 1.0, 0.0))
     if keys[K_e]:
         ytemp += 1 * deltaTime 
         xtemp = glm.sin(angleTemp) * radius
         ztemp = glm.cos(angleTemp) * radius
-        rend.viewMatix = glm.lookAt(glm.vec3(xtemp, ytemp, ztemp), face.position, glm.vec3(0.0, 1.0, 0.0))
-
+        rend.viewMatix = glm.lookAt(glm.vec3(xtemp, ytemp, ztemp), face[index].position, glm.vec3(0.0, 1.0, 0.0))
 
     # Rotacion de camara
     if keys[K_d]:
@@ -89,14 +92,6 @@ while isRunning:
             if rend.valor > 2:
                 rend.valor -= 0.5 * deltaTime
 
-    if keys[K_LEFT]:
-        rend.valor -=1 * deltaTime
-        rend.activeEffect = 1
-
-    if keys[K_RIGHT]:
-        rend.activeEffect = 1
-        rend.valor +=1 * deltaTime
-
     #Zoom de camara
     if keys[K_g]:
         if rend.fov > glm.radians(5):
@@ -119,6 +114,12 @@ while isRunning:
         elif ev.type == pygame.KEYDOWN:
             if ev.key == pygame.K_ESCAPE:
                 isRunning = False
+            if ev.key == K_LEFT:
+                index = (index - 1) % len(face)
+                rend.scene = face[index] 
+            if ev.key == K_RIGHT:
+                index = (index + 1)  % len(face)
+                rend.scene = face[index]
             if ev.key == K_1:
                 rend.filledMode()
             if ev.key == K_2:

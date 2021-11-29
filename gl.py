@@ -153,7 +153,7 @@ class Renderer(object):
 
         self.filledMode()
 
-        self.scene = []
+        self.scene = None
         self.tiempo = 0
         self.valor = 10
         self.pointLight = glm.vec3(0, 0, 2)
@@ -224,10 +224,9 @@ class Renderer(object):
             glUniform3f(glGetUniformLocation(self.active_shader, "pointLight"),
                         self.pointLight.x, self.pointLight.y, self.pointLight.z)
 
-        for model in self.scene:
-            if self.active_shader:
-                glUniformMatrix4fv(glGetUniformLocation(self.active_shader, "modelMatrix"),
-                                1, GL_FALSE, glm.value_ptr(model.getModelMatrix()))
-                glUniform1i(glGetUniformLocation(self.active_shader, "tex1"), 0)
-                glUniform1i(glGetUniformLocation(self.active_shader, "tex2"), 1)
-            model.renderInScene()
+        if self.active_shader:
+            glUniformMatrix4fv(glGetUniformLocation(self.active_shader, "modelMatrix"),
+                            1, GL_FALSE, glm.value_ptr(self.scene.getModelMatrix()))
+            glUniform1i(glGetUniformLocation(self.active_shader, "tex1"), 0)
+            glUniform1i(glGetUniformLocation(self.active_shader, "tex2"), 1)
+            self.scene.renderInScene()
