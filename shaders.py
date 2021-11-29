@@ -10,14 +10,20 @@ uniform mat4 projectionMatrix;
 
 uniform float tiempo;
 uniform vec3 pointLight; 
+uniform int activeEffect;
 
 out vec3 outColor;
 out vec2 outTexCoords;
 out float glowAmount;
+out float effect;
 
 void main()
 {
-
+    if (activeEffect == 1){
+        effect = 1.0;
+    }else {
+        effect = 0.0;
+    }
     vec4 norm = vec4(normal, 0.0);
     vec4 pos = modelMatrix * vec4 (position, 1.0);
     vec4 light = vec4(pointLight, 1.0);
@@ -69,6 +75,46 @@ void main()
     outTexCoords = texCoords;
 }
 """
+dizziness_vertex_shader = """
+#version 460
+layout (location = 0) in vec3 position;
+layout (location = 1) in vec3 normal;
+layout (location = 2) in vec2 texCoords;
+
+uniform mat4 modelMatrix;
+uniform mat4 viewMatrix;
+uniform mat4 projectionMatrix;
+
+uniform float tiempo;
+uniform vec3 pointLight; 
+uniform float valor;
+uniform int activeEffect;
+
+out vec3 outColor;
+out vec2 outTexCoords;
+
+void main()
+{
+    vec4 pos = vec4(position, 1.0);
+    vec4 norm = vec4(normal, 0.0);
+    if(activeEffect == 1){
+        pos = pos + norm * sin(tiempo) / valor;
+        outColor = vec3(1.0-tiempo, 1.0, 1.0-tiempo);
+    }else if(activeEffect == 2){
+        pos = pos + norm * log(tiempo) / 5;
+        outColor = vec3(1.0, 1.0-tiempo, 1.0-tiempo);
+    }else{
+        pos = modelMatrix * pos;
+        outColor = vec3(1.0);
+    }
+    vec4 light = vec4(pointLight, 1.0);
+
+    float intensity = dot(modelMatrix * norm, normalize(light - pos));
+
+    gl_Position = projectionMatrix * viewMatrix * pos;
+    outTexCoords = texCoords;
+}
+"""
 
 fragment_shader = """
 #version 460
@@ -106,13 +152,38 @@ layout (location = 0) out vec4 fragColor;
 
 in vec3 outColor; 
 in vec2 outTexCoords;
+in float effect;
 
 uniform sampler2D tex;
 
 void main()
 {
     vec4 neg = vec4(1.0, 1.0, 1.0, 1.0);
-    fragColor = neg - texture(tex, outTexCoords);
+    fragColor = texture(tex, outTexCoords);
+    if(effect == 1){
+        fragColor = neg - texture(tex, outTexCoords);
+    }
+}
+"""
+
+wft_fragment_shader = """
+#version 460
+layout (location = 0) out vec4 fragColor;
+
+in vec3 outColor; 
+in vec2 outTexCoords;
+
+uniform int activeEffect;
+uniform sampler2D tex;
+
+void main()
+{
+    vec4 neg = vec4(1.0, 1.0, 1.0, 1.0);
+    if(activeEffect == 1){
+        fragColor = neg - texture(tex, outTexCoords);
+    }else{
+        texture(tex, outTexCoords);
+    }
 }
 """
 

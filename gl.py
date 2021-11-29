@@ -155,9 +155,10 @@ class Renderer(object):
 
         self.scene = []
         self.tiempo = 0
-        self.valor = 0
+        self.valor = 10
         self.pointLight = glm.vec3(0, 0, 2)
         self.fov = glm.radians(60)
+        self.activeEffect = 0
         # Viww Matrix
         self.camPosition = glm.vec3(0,0,5)
         self.camRotation = glm.vec3(0,0,0) # pitch, yaw, roll
@@ -218,6 +219,7 @@ class Renderer(object):
 
             glUniform1f(glGetUniformLocation(self.active_shader, "tiempo"), self.tiempo)
             glUniform1f(glGetUniformLocation(self.active_shader, "valor"), self.valor)
+            glUniform1i(glGetUniformLocation(self.active_shader, "activeEffect"), self.activeEffect)
 
             glUniform3f(glGetUniformLocation(self.active_shader, "pointLight"),
                         self.pointLight.x, self.pointLight.y, self.pointLight.z)

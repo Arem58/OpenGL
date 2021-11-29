@@ -38,20 +38,21 @@ def circularMov(angle):
     return x, z, angle
 
 rend.scene.append( face )
-
-
+sickTime = 0
+angryTime = 0
 isRunning = True
 while isRunning:
 
     keys = pygame.key.get_pressed()
+    isPressed = False
 
     # Traslacion de camara
     if keys[K_w]:
         radius += 1 * deltaTime
-        circularMov(0)
+        xtemp, ztemp, angleTemp = circularMov(0)
     if keys[K_s]:
         radius -= 1 * deltaTime
-        circularMov(0)
+        xtemp, ztemp, angleTemp = circularMov(0)
     if keys[K_q]:
         ytemp -= 1 * deltaTime
         xtemp = glm.sin(angleTemp) * radius
@@ -63,18 +64,37 @@ while isRunning:
         ztemp = glm.cos(angleTemp) * radius
         rend.viewMatix = glm.lookAt(glm.vec3(xtemp, ytemp, ztemp), face.position, glm.vec3(0.0, 1.0, 0.0))
 
+
     # Rotacion de camara
     if keys[K_d]:
         angle += deltaTime
         xtemp, ztemp, angleTemp = circularMov(angle)
+        if activeShader == 5:
+            if angryTime > 0:
+                angryTime -= 1 * deltaTime
+            if sickTime < 5.5:
+                sickTime += deltaTime
+            isPressed = True
+            if rend.valor > 2:
+                rend.valor -= 0.5 * deltaTime
     if keys[K_a]:
         angle -= deltaTime
         xtemp, ztemp, angleTemp = circularMov(angle)
+        if activeShader == 5:
+            if angryTime > 0:
+                angryTime -= 1 * deltaTime
+            if sickTime < 5.5:
+                sickTime += deltaTime
+            isPressed = True
+            if rend.valor > 2:
+                rend.valor -= 0.5 * deltaTime
 
     if keys[K_LEFT]:
         rend.valor -=1 * deltaTime
+        rend.activeEffect = 1
 
     if keys[K_RIGHT]:
+        rend.activeEffect = 1
         rend.valor +=1 * deltaTime
 
     #Zoom de camara
@@ -105,19 +125,54 @@ while isRunning:
                 rend.wireframeMode()
             if ev.key == K_3:
                 activeShader = 1
+                rend.activeEffect = 0
                 rend.setShaders(shaders.vertex_shader, shaders.fragment_shader)
             if ev.key == K_4:
                 activeShader = 2
+                rend.activeEffect = 0
                 rend.setShaders(shaders.toon_vertex_shaders, shaders.fragment_shader)
             if ev.key == K_5:
                 activeShader = 3
+                rend.activeEffect = 0
                 rend.setShaders(shaders.vertex_shader, shaders.neg_fragment_shader)
             if ev.key == K_6:
+                rend.activeEffect = 0
                 activeShader = 4
                 rend.setShaders(shaders.vertex_shader, shaders.glow_fragment_shader)
-    
-    rend.tiempo += deltaTime 
+            if ev.key == K_7:
+                rend.activeEffect = 0
+                activeShader = 5
+                rend.setShaders(shaders.dizziness_vertex_shader, shaders.fragment_shader)
+            if ev.key == K_8:
+                rend.activeEffect = 0
+                activeShader = 6
+                rend.setShaders(shaders.vertex_shader, shaders.wft_fragment_shader)
 
+    if activeShader ==3:
+        if ztemp < 0:
+            rend.activeEffect = 1
+        elif ztemp >= 0:
+            rend.activeEffect = 0
+    
+    if activeShader == 5:
+        if not isPressed:
+            if sickTime > 0:
+                sickTime -= deltaTime
+            rend.activeEffect = 0
+            if angryTime < 5.5:
+                angryTime += deltaTime
+        rend.tiempo += deltaTime 
+    
+        if angryTime > 4:
+            rend.activeEffect = 2
+        
+        if angryTime < 4:
+            if sickTime > 4:
+                rend.activeEffect = 1
+            else:
+                rend.activeEffect = 0
+                rend.tiempo = 2
+    
     deltaTime = clock.tick(60) / 1000
     rend.render()
     pygame.display.flip()
