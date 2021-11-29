@@ -18,6 +18,8 @@ clock = pygame.time.Clock()
 
 rend = Renderer(screen)
 rend.setShaders(shaders.vertex_shader, shaders.fragment_shader)
+activeShader = 1
+
 
 face = Model('model.obj', 'model.bmp', 'model_normal.bmp')
 
@@ -102,12 +104,16 @@ while isRunning:
             if ev.key == K_2:
                 rend.wireframeMode()
             if ev.key == K_3:
+                activeShader = 1
                 rend.setShaders(shaders.vertex_shader, shaders.fragment_shader)
             if ev.key == K_4:
+                activeShader = 2
                 rend.setShaders(shaders.toon_vertex_shaders, shaders.fragment_shader)
             if ev.key == K_5:
+                activeShader = 3
                 rend.setShaders(shaders.vertex_shader, shaders.neg_fragment_shader)
             if ev.key == K_6:
+                activeShader = 4
                 rend.setShaders(shaders.vertex_shader, shaders.glow_fragment_shader)
     
     rend.tiempo += deltaTime 

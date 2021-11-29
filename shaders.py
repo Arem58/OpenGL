@@ -57,7 +57,10 @@ void main()
     vec4 light = vec4(pointLight, 1.0);
 
     float intensity = dot(modelMatrix * norm, normalize(light - pos));
-    intensity = intensity > 0.95 ? 1 : (intensity > 0.7 ? 0.8 : (intensity > 0.4 ? 0.6 : (intensity > 0.2 ? 0.4 : 0.3)));
+    //intensity = intensity > 0.95 ? 1 : (intensity > 0.7 ? 0.8 : (intensity > 0.4 ? 0.6 : (intensity > 0.2 ? 0.4 : 0.3)));
+    //intensity = intensity > 0.85 ? 1 : (intensity > 0.6 ? 0.8 : (intensity > 0.45 ? 0.55 : (intensity > 0.3 ? 0.4 : 0.25)));
+    //intensity = intensity > 0.95 ? 1 : (intensity > 0.75 ? 0.8 : (intensity > 0.5 ? 0.6 : (intensity > 0.25 ? 0.4 : 0.2)));
+    intensity = intensity > 0.95 ? 1 : (intensity > 0.5 ? 0.6 : (intensity > 0.25 ? 0.4 : 0.2));
     //intensity = intensity > 0.95 ? 1 : (intensity > 0.7 ? 0.7 : (intensity > 0.4 ? 0.4 : (intensity > 0.1 ? 0.1 : 0.05)));
     //intensity = intensity > 0.95 ? 0.05 : (intensity > 0.7 ? 0.4 : (intensity > 0.4 ? 0.7 : (intensity > 0.1 ? 1 : 0.05)));
 
